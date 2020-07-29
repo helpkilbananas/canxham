@@ -7,25 +7,38 @@ import os
 
 class Exam:
     def __init__(self):
-        if len(argv) != 2 and argv[1] not in ["adv", "basic"]:
-            print("\nUsage:  canxham.py  'basic' { or } 'adv'  \n")
+        self.french = 0
+        if "-mfr" in argv:
+            argv.pop(argv.index("-mfr"))
+            self.french = 1
+        
+        if len(argv) == 2 and "adv" in argv:
+            self.exam_type = "adv"
+        elif len(argv) == 2 and "basic" in argv:
+            self.exam_type = "basic"
+        else:
+            print("\nUsage:  python canxham.py  'basic' { or } 'adv'")
+            print("Mode Français:  Ajouter  '-mfr'  au fin\n")
             exit(1)
 
-        if argv[1] == "adv":
+        if self.exam_type == "adv":
             self.question_total = 50
         else:
             self.question_total = 100
         
         self.pwd = os.path.dirname(__file__)
-        self.file_name = f"amat_{argv[1]}_quest"
+        self.file_name = f"amat_{self.exam_type}_quest"
         self.url = f"http://apc-cap.ic.gc.ca/datafiles/{self.file_name}.zip"
 
         self.score = 0
 
     def update(self):
-        print(f"Fetch latest {argv[1]} exam data {self.url}...")
+        if self.french:
+            print(f"Téléchargement des fichiers d'exam {self.exam_type} {self.url}...")
+        else:
+            print(f"Fetch latest {self.exam_type} exam data {self.url}...")
         download = r.get(self.url)
-        print("Done\n")
+        print("Done!\n\nGood Luck et Bonne Chance DE VO1ZXZ\n\n")
         
         with open(f"{self.pwd}{self.file_name}.zip", "wb") as f:
             f.write(download.content)
@@ -52,16 +65,25 @@ class Exam:
         question_list = []
         for i in range(self.question_total):
             question = rand(self.data)
-            while f"{argv[1][0].upper()}-00" not in question:
+            while f"{self.exam_type[0].upper()}-00" not in question:
                 question = rand(self.data)
             
             self.data.pop(self.data.index(question))
             
-            question = ";".join(question.split(";")[:6])
+            question_id = f"{question.split(';')[0]}"
+            
+            if self.french:
+                question = ";".join(question.replace("\n", "").split(";")[6:])
+            else:
+                question = ";".join(question.split(";")[1:6])
             question_list.append(question.split(";"))
             
-            question = "\n".join(question_list[i][:2]).upper()
-            answers = question_list[i][2:]
+            question = "\n".join([question_id] + question_list[i][:1]).upper()
+
+            if self.french:
+                answers = question_list[i][1:-1]
+            else:
+                answers = question_list[i][1:]
             correct = answers[0]
             
             answer_list = []
@@ -76,10 +98,22 @@ class Exam:
                 print(f" {abc[j]}):  {answer_list[j]}\n")
             
             try:
-                answered = str(input("\nYour Answer: ").lower())
-                while answered not in abc:
-                    print(f"Invalid choice:  [{answered}]")    
+                if self.french:
+                    answered = str(input("\nVotre Réponse: ").lower())
+                else:
                     answered = str(input("\nYour Answer: ").lower())
+                
+                while answered not in abc:
+                    if self.french:
+                        print(f"Choix mal compris:  [{answered}]")
+                    else:
+                        print(f"Invalid choice:  [{answered}]")    
+                
+                    if self.french:
+                        answered = str(input("\nVotre Réponse: ").lower())
+                    else:
+                        answered = str(input("\nYour Answer: ").lower())
+
             except KeyboardInterrupt:
                 if self.score:
                     score = self.score / self.question_total * 100
@@ -89,10 +123,16 @@ class Exam:
                 exit(2)
 
             if answer_list[abc.index(answered)] == correct:
-                print(f"Correct!  The answer is:\n{correct} ({answered})\n")
+                if self.french:
+                    print(f"Correcte!  Bonne réponse:\n{correct} ({answered})\n\n")
+                else:
+                    print(f"Correct!  The answer is:\n{correct} ({answered})\n\n")
                 self.score += 1
             else:
-                print(f"Incorrect!  The answer is:\n{correct} ({abc[answer_list.index(correct)]})\n")
+                if self.french:
+                    print(f"Incorrecte!  Bonne réponse:\n{correct} ({answered})\n\n")
+                else:
+                    print(f"Incorrect!  The answer is:\n{correct} ({abc[answer_list.index(correct)]})\n\n")
             
             exam_log = [f"\n#{i + 1} {question}\n", 
                        [f"{abc[j]}):  {answer_list[j]}\n" for j in range(len(answer_list))],
@@ -116,5 +156,4 @@ else:
     score = 0
 
 print(f"\nScore:  {score}%\n")
-
 
