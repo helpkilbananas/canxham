@@ -27,9 +27,8 @@ For an advanced exam
 python canxham.py adv
 ```
 
-Mode Français
-
-Ajouter '-mfr' au fin:
+Mode Français:
+Ajouter '-mfr' au fin
 
 ```
 python canxham.py adv -mfr

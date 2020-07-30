@@ -42,8 +42,10 @@ class Exam:
         
         with open(f"{self.pwd}{self.file_name}.zip", "wb") as f:
             f.write(download.content)
+        
         zip_file = zipfile.ZipFile(f"{self.pwd}{self.file_name}.zip")
         zip_file.extract(f"{self.file_name}_delim.txt")
+        zip_file.close()
         os.remove(f"{self.pwd}{self.file_name}.zip")
 
         with open(f"{self.pwd}{self.file_name}_delim.txt", "rb") as f:
