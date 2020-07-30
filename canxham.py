@@ -132,7 +132,7 @@ class Exam:
                 self.score += 1
             else:
                 if self.french:
-                    print(f"Incorrecte!  Bonne réponse:\n{correct} ({answered})\n\n")
+                    print(f"Incorrecte!  Bonne réponse:\n{correct} ({abc[answer_list.index(correct)]})\n\n")
                 else:
                     print(f"Incorrect!  The answer is:\n{correct} ({abc[answer_list.index(correct)]})\n\n")
             
