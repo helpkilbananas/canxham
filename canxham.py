@@ -50,30 +50,29 @@ class Exam:
 
         with open(f"{self.pwd}{self.file_name}_delim.txt", "rb") as f:
             data = f.readlines()
+        os.remove(f"{self.pwd}{self.file_name}_delim.txt")
+        
         d = [i.decode("latin").split(";") + ["\r"] for i in data]
         self.data = [f'{";".join(i)}' for i in sorted(d)]
-        os.remove(f"{self.pwd}{self.file_name}_delim.txt")
-
-    def start(self):
-        self.date = dt.utcnow().strftime("%Y-%m-%d-%H%M")
 
         data = []
         for line in self.data:
             sections = line.split("\r")
             for i in range(len(sections)):
                 data.append(sections[i].replace("\r", ""))
-        self.data = data
+        self.data = data[:-2:2]
+
+    def start(self):
+        self.date = dt.utcnow().strftime("%Y-%m-%d-%H%M")
 
         question_list = []
         for i in range(self.question_total):
             question = rand(self.data)
-            while f"{self.exam_type[0].upper()}-00" not in question:
-                question = rand(self.data)
-            
-            self.data.pop(self.data.index(question))
-            
-            question_id = f"{question.split(';')[0]}"
-            
+            question_id = question.split(';')[0]
+            category = question_id[:-3]
+
+            self.data = [j for j in self.data if category not in j.split(";")[0][:-3]]
+
             if self.french:
                 question = ";".join(question.replace("\n", "").split(";")[6:])
             else:
