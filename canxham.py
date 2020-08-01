@@ -1,6 +1,6 @@
 from datetime import datetime as dt
 from secrets import choice as rand
-from sys import argv
+from sys import argv, exit
 import requests as r
 import zipfile
 import os
@@ -28,7 +28,7 @@ class Exam:
         
         self.pwd = os.path.dirname(__file__)
         self.file_name = f"amat_{self.exam_type}_quest"
-        self.url = f"http://apc-cap.ic.gc.ca/datafiles/{self.file_name}.zip"
+        self.url = f"https://apc-cap.ic.gc.ca/datafiles/{self.file_name}.zip"
 
         self.score = 0
 
@@ -37,7 +37,13 @@ class Exam:
             print(f"Téléchargement des fichiers d'exam {self.exam_type} {self.url}...")
         else:
             print(f"Fetch latest {self.exam_type} exam data {self.url}...")
+        
         download = r.get(self.url)
+        if not download.ok:
+            print(f"\n{download.url}: {download.status_code} {download.reason}")
+            print("Try again later/Réessayez plus tard\n")
+            exit(download.status_code)
+
         print("Done!\n\nGood Luck et Bonne Chance DE VO1ZXZ\n\n")
         
         with open(f"{self.pwd}{self.file_name}.zip", "wb") as f:
@@ -104,7 +110,11 @@ class Exam:
                 else:
                     answered = str(input("\nYour Answer: ").lower())
                 
+                bye = ["exit", "quit", "done", "bye", "fin", ":q", "73"]
                 while answered not in abc:
+                    if answered in bye:
+                        raise KeyboardInterrupt
+
                     if self.french:
                         print(f"Choix mal compris:  [{answered}]")
                     else:
@@ -157,4 +167,3 @@ else:
     score = 0
 
 print(f"\nScore:  {score}%\n")
-
