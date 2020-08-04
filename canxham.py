@@ -1,8 +1,8 @@
 from datetime import datetime as dt
 from secrets import choice as rand
+from zipfile import ZipFile
 from sys import argv, exit
 import requests as r
-import zipfile
 import os
 
 class Exam:
@@ -28,6 +28,8 @@ class Exam:
         
         self.pwd = os.path.dirname(__file__)
         self.file_name = f"amat_{self.exam_type}_quest"
+        self.file_path = os.path.join(self.pwd, self.file_name)
+        self.log_path = os.path.join(self.pwd, self.file_name[:-6] + "_EXAM")
         self.url = f"https://apc-cap.ic.gc.ca/datafiles/{self.file_name}.zip"
 
         self.score = 0
@@ -38,7 +40,14 @@ class Exam:
         else:
             print(f"Fetch latest {self.exam_type} exam data {self.url}...")
         
-        download = r.get(self.url)
+        try:        
+            download = r.get(self.url)
+        except:
+            print("Network Error/Erreur de connexion")
+            print("Assurez-vous avoir une connexion Internet, et réessayez.")
+            print("Make sure you have an Internet connection, and try again.")
+            exit(3)
+
         if not download.ok:
             print(f"\n{download.url}: {download.status_code} {download.reason}")
             print("Try again later/Réessayez plus tard\n")
@@ -46,17 +55,16 @@ class Exam:
 
         print("Done!\n\nGood Luck et Bonne Chance DE VO1ZXZ\n\n")
         
-        with open(f"{self.pwd}{self.file_name}.zip", "wb") as f:
+        with open(f"{self.file_path}.zip", "wb") as f:
             f.write(download.content)
         
-        zip_file = zipfile.ZipFile(f"{self.pwd}{self.file_name}.zip")
-        zip_file.extract(f"{self.file_name}_delim.txt")
-        zip_file.close()
-        os.remove(f"{self.pwd}{self.file_name}.zip")
+        with ZipFile(f"{self.file_path}.zip") as f: 
+            f.extract(f"{self.file_path}_delim.txt")
+        os.remove(f"{self.file_path}.zip")
 
-        with open(f"{self.pwd}{self.file_name}_delim.txt", "rb") as f:
+        with open(f"{self.file_path}_delim.txt", "rb") as f:
             data = f.readlines()
-        os.remove(f"{self.pwd}{self.file_name}_delim.txt")
+        os.remove(f"{self.file_path}_delim.txt")
         
         d = [i.decode("latin").split(";") + ["\r"] for i in data]
         self.data = [f'{";".join(i)}' for i in sorted(d)]
@@ -135,15 +143,19 @@ class Exam:
 
             if answer_list[abc.index(answered)] == correct:
                 if self.french:
-                    print(f"Correcte!  Bonne réponse:\n{correct} ({answered})\n\n")
+                    print("Correcte!  Bonne réponse:")
+                    print(f"{correct} ({answered})\n\n")
                 else:
-                    print(f"Correct!  The answer is:\n{correct} ({answered})\n\n")
+                    print("Correct!  The answer is:")
+                    print(f"{correct} ({answered})\n\n")
                 self.score += 1
             else:
                 if self.french:
-                    print(f"Incorrecte!  Bonne réponse:\n{correct} ({abc[answer_list.index(correct)]})\n\n")
+                    print("Incorrecte!  Bonne réponse:")
+                    print(f"{correct} ({abc[answer_list.index(correct)]})\n\n")
                 else:
-                    print(f"Incorrect!  The answer is:\n{correct} ({abc[answer_list.index(correct)]})\n\n")
+                    print(f"Incorrect!  The answer is:")
+                    print(f"{correct} ({abc[answer_list.index(correct)]})\n\n")
             
             exam_log = [f"\n#{i + 1} {question}\n", 
                        [f"{abc[j]}):  {answer_list[j]}\n" for j in range(len(answer_list))],
@@ -152,7 +164,7 @@ class Exam:
                        f"\nCurrent score: {self.score}",
                        f"\nCurrent mark: {self.score / self.question_total * 100}%\n"]
 
-            with open(f"{self.pwd}{argv[1]}_EXAM-{self.date}.txt", "a") as f:
+            with open(f"{self.log_path}-{self.date}.txt", "a") as f:
                 for j in range(len(exam_log)):
                     f.write("".join(exam_log[j]))
                     
@@ -167,3 +179,4 @@ else:
     score = 0
 
 print(f"\nScore:  {score}%\n")
+
