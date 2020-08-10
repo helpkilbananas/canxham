@@ -7,6 +7,11 @@ import os
 
 class Exam:
     def __init__(self):
+        if ".py" in argv[0]:
+            self.name = f"python {argv[0]}"
+        else:
+            self.name = argv[0]
+
         self.french = 0
         if "-mfr" in argv:
             argv.pop(argv.index("-mfr"))
@@ -17,7 +22,7 @@ class Exam:
         elif len(argv) == 2 and "basic" in argv:
             self.exam_type = "basic"
         else:
-            print("\nUsage:  python canxham.py  'basic' { or } 'adv'")
+            print(f"\nUsage:  {self.name}  'basic'  or  'adv'")
             print("Mode Français:  Ajouter  '-mfr'  au fin\n")
             exit(1)
 

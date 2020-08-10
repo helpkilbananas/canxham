@@ -2,6 +2,9 @@
 
 A practice exam generator for aspiring Canadian amateur radio operators.
 
+### Windows users download latest [release](https://github.com/helpkilbananas/canxham/releases).
+
+
 ### Prerequisites
 
 Python3.6 or higher:
